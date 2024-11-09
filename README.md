@@ -71,3 +71,47 @@ func main() {
 go run main.go
 ```
 `http://localhost:3333/`にアクセスして`hello chi`が表示されることを確認した。
+
+
+## xoセットアップ
+
+### 1. DBをDockerで用意
+
+compose.ymlで簡易的に実装
+
+### 2. xoをインストール
+
+```bash
+go install github.com/xo/xo@latest
+```
+
+### 仮のテーブルを作成するSQLを作成
+
+sql/create-user-table.sqlに仮のUserテーブルを作成するSQLを記述。
+
+DB起動してSQLを流す
+```bash
+docker compose up -d
+cat sql/create-user-table.sql | docker compose exec -T db psql -U postgres -d xodb
+
+# 確認
+docker compose exec db psql -U postgres -d xodb -c "\dt"
+```
+
+以下は確認用コマンドの実行結果
+```
+List of relations
+ Schema | Name  | Type  |  Owner   
+--------+-------+-------+----------
+ public | users | table | postgres
+(1 row)
+```
+
+### 4. xoを利用してモデルを作成する
+
+```
+# 事前にmodelsディレクトリを作成
+mkdir models
+# xoで自動生成
+xo schema postgres://postgres:password@localhost:5432/xodb?sslmode=disable
+```
